@@ -1,0 +1,225 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+  # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+  # http:
+  #   base_url: example.duckdns.org:8123
+homeassistant:
+  packages: !include_dir_named packages
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# Example configuration.yaml entry
+# Example configuration.yaml entry for the Telegram Bot
+telegram_bot:
+  - platform: polling
+    api_key: 984149099:AAFngj2dRuO5yrN05meexzoUNT0kp01nROY
+    allowed_chat_ids:
+      - 50141738
+      - 50141738
+# Example configuration.yaml entry for the notifier
+notify:
+  - name: NOTIFIER_NAME
+    platform: telegram
+    chat_id: 50141738
+zone:
+  - name: Casa
+    latitude: 43.090109
+    longitude: -2.314805
+    radius: 76
+  - name: UGLE
+    latitude: 43.089047
+    longitude: -2.309768
+    radius: 76
+    icon: mdi:school
+  - name: Eroski
+    latitude: 43.091989
+    longitude: -2.314671
+    radius: 76
+    icon: mdi:shopping
+  - name: Home
+    latitude: 43.090109
+    longitude: -2.314805
+    radius: 100
+    icon: mdi:home
+sensor:
+  - platform: template
+    sensors:
+      bateria_edu:
+        friendly_name: "Bateria Edu"
+        unit_of_measurement: "%"
+        value_template: "{{ states.device_tracker.life360_edu_fernandez.attributes.battery|round }}"
+        device_class: battery
+
+      bateria_ainara:
+        friendly_name: "Bateria Ainara"
+        unit_of_measurement: "%"
+        value_template: "{{ states.device_tracker.life360_ainara.attributes.battery|round }}"
+        device_class: battery
+
+      bateria_ainhoa:
+        friendly_name: "Bateria Ainhoa"
+        unit_of_measurement: "%"
+        value_template: "{{ states.device_tracker.life360_ainhoa_lubian.attributes.battery|round }}"
+        device_class: battery
+
+#  - platform: aemet
+#    name: AEMET
+#    api_key: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZHUyNHhAaG90bWFpbC5jb20iLCJqdGkiOiIwMDdmNThkZC1mNDY2LTRiYTUtYTE4MC01YmQ2NjAwMzBjOTgiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTU5Mzg0MjYyNCwidXNlcklkIjoiMDA3ZjU4ZGQtZjQ2Ni00YmE1LWExODAtNWJkNjYwMDMwYzk4Iiwicm9sZSI6IiJ9.TsQqCK8eixTdDxRX6OAIGfngKMwUjISPGXMPO6y5lxI
+#    station_id: 1037Y
+#    monitored_conditions:
+#      - temperature
+#      - humidity
+#      - pressure
+#      - precipitation
+#      - snow
+#      - visibility
+#alexa_media:
+#  accounts:
+#    - email: edu24x@outlook.com
+#      password: Efg206026084
+#      url: "amazon.es"
+# Example configuration.yaml entry
+discovery:
+  ignore:
+    - yeelight
+yeelight:
+  devices:
+    192.168.0.12:
+      name: plafón
+mqtt:
+  broker: 192.168.0.15
+  username: mqtt
+  password: 123456
+  discovery: true
+  discovery_prefix: homeassistant
+switch:
+  - platform: mqtt
+    name: "lamparatasmota"
+    state_topic: "stat/sonoffmini1/POWER"
+    command_topic: "cmnd/sonoffmini1/POWER"
+    retain: true
+
+  - platform: broadlink
+    host: 192.168.1.208
+    mac: 24:DF:A7:7A:78:73
+
+# Example configuration.yaml entry
+
+#smartir:
+#  check_updates: false
+
+#switch:
+#  - platform: broadlink
+#    host: 192.168.0.12
+#    mac: 24:DF:A7:7A:78:73
+
+media_player:
+  - platform: smartir
+    name: Living room TV
+    unique_id: living_room_tv
+    device_code: 1020
+    controller_data: 192.168.0.12
+    power_sensor: binary_sensor.tv_power
+
+  - platform: braviatv_psk
+    host: 192.168.1.102
+    psk: sony
+    mac: D8:9C:67:5B:CD:15
+    amp: True
+    android: True
+    sourcefilter:
+      - " HD"
+      - HDMI
+    time_format: 12H
+    user_labels: True
+    name: MyBraviaTV
+
+# SONOFF LAN
+sonoff:
+  username: !secret sonoff_user
+  password: !secret sonoff_password
+
+  # SENSORES RFBRIDGE
+  rfbridge:
+    # SENSOR PUERTA DOS ESTADOS
+    Botón1:
+      name: GS-WDS07
+      device_class: door
+      timeout: 0
+      payload_off: botón2
+
+    # SENSOR PIR
+    sonoff sensor movimiento: # button/sensor name in eWeLink application
+      device_class: motion # e.g. door, motion, window
+      timeout: 60 # optional (default 120), timeout in seconds for auto turn off
+    kerui sensor movimiento: # button/sensor name in eWeLink application
+      device_class: motion # e.g. door, motion, window
+      timeout: 60 # optional (default 120), timeout in seconds for auto turn off
+
+    # SENSOR PUERTA UN ESTADO
+    Sensor Puerta Principal: # sensor name in eWeLink application
+      name: Sensor Puerta Principal # optional, you can change sensor name
+      device_class: door # e.g. door, window
+      timeout: 5
+
+    kerui puerta abierta: # sensor name in eWeLink application
+      name: kerui puerta abierta # optional, you can change sensor name
+      device_class: door # e.g. door, window
+      timeout: 5
+    kerui puerta cerrada:
+      name: kerui puerta cerrada
+      device_class: door
+      timeout: 5
+
+# DuckDNS
+http:
+  ssl_certificate: /ssl/fullchain.pem
+  ssl_key: /ssl/privkey.pem
+
+#   devices:
+#     100090f8d9:
+#       device_class: light
+#       name: Mesa
+
+# switch.sonoff_1000b70c68
+#sonoff:
+#  username: edu24x@gmail.com
+#  password: e64f24xx
+#  scan_interval: 10
+#  grace_period: 600
+#  api_region: 'eu'
+#
+#hacs:
+#  token: df09d9d2257303e103b4726cf09f26dfd4163e84
+
+#AEMET
+
+#android_ip_webcam:
+#  - host: 192.168.1.93
+#    port: 8080
+#    sensors:
+#      - battery_level
+#      - light
+#      - motion
+#      - proximity
+#      - sound
+#    switches:
+#      - night_vision
+#      - torch
+#      - video_recording
+
+# Example configuration.yaml with local_ip set
+#upnp:
+#  local_ip: 192.168.1.71
+
+#  homeassistant:
+#  media_dirs:
+#    media: /share
+#    recording: /mnt/recordings
